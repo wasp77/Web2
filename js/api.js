@@ -6,6 +6,8 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var models = require('./model.js');
+var morgan = require('morgan');
+var jwt = require('jsonwebtoken');
 //var validator = require('validator');
 
 (function() {
@@ -47,6 +49,7 @@ var models = require('./model.js');
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json());
     app.use(express.static('static'));
+    app.use(morgan('dev'));
 
     app.route("/dissertation")
         .post(function(req, res) {
@@ -55,7 +58,7 @@ var models = require('./model.js');
           dissertation.title = req.body.title;
           dissertation.description = req.body.description;
           dissertation.proposer = req.body.proposer;
-          dissertation.proper_role = req.body.proper_role;
+          dissertation.proposer_role = req.body.proposer_role;
 
 
           dissertation.save(function(err) {
@@ -78,21 +81,124 @@ var models = require('./model.js');
 
     app.route("/dissertation/:id")
         .get(function(req, res) {
-
+          models.Dissertation.findById(req.params.id, function(err, dissertations) {
+            if (err) {
+              res.send(err);
+            }
+            res.json(dissertations);
+          })
         })
         .put(function(req, res) {
+          models.Dissertation.findById(req.params.id, function(err, dissertations) {
+            if (err) {
+              res.send(err);
+            }
 
+            updateDissertation(dissertations);
+
+            dissertations.save(function(err) {
+              if (err) {
+                res.send(err);
+              }
+              res.json({ message: 'Dissertation updated' });
+            })
+          })
         })
         .delete(function(req, res) {
           models.Dissertation.remove({
             _id: req.params.id
-          }, function(err, bear) {
+          }, function(err, dissertations) {
             if (err)
               res.send(err);
 
             res.json({ message: 'Successfully deleted' });
           })
         });
+
+    app.route('/dissertations/:id/interest/:userid')
+        .post(function(req, res) {
+          models.Dissertation.findById(req.params.id, function(err, dissertations) {
+            if (err) {
+              res.send(err);
+            }
+            res.json(dissertations);
+          })
+        })
+
+    app.route('/dissertations/:id/allocations/:userid')
+        .post(function(req, res) {
+          models.Dissertation.findById(req.params.id, function(err, dissertations) {
+            if (err) {
+              res.send(err);
+            }
+            res.json(dissertations);
+          })
+        })
+
+    app.route('/user')
+        .get(function(req,res) {
+          models.User.find(function(err, users) {
+            if (err) {
+              res.send(err);
+            }
+            res.json(users);
+          })
+        });
+
+    app.route('/user/:id')
+        .get(function(req, res) {
+          models.User.findById(req.params.id, function(err, users) {
+            if (err) {
+              res.send(err);
+            }
+            res.json(users);
+          })
+        })
+        .put(function(req, res) {
+          models.User.findById(req.params.id, function(err, users) {
+            if (err) {
+              res.send(err);
+            }
+
+            updateUser(users);
+
+            users.save(function(err) {
+              if (err) {
+                res.send(err);
+              }
+              res.json({ message: 'User created or updated'});
+            })
+          })
+        })
+        .delete(function(req, res) {
+          models.User.remove({
+            _id: req.params.id
+          }, function(err, users) {
+            if (err)
+              res.send(err);
+
+            res.json({ message: 'Successfully deleted' });
+          })
+        })
+
+    app.route('/user/staff')
+        .get(function(req, res) {
+          models.User.find({proposer_role: 'staff'}, function(err, users) {
+            if (err)
+              res.send(err);
+
+            res.json(users);
+          })
+        })
+
+  }
+
+  function updateDissertation(dissertation) {
+
+  }
+
+  function updateUser(user) {
+
   }
 
   /***********************************************************************************
