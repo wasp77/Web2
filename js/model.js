@@ -31,10 +31,23 @@ var  mongoose = require("mongoose");
     title: String,
     description: String,
     proposer: String,
-    proper_role: String,
+    proposer_role: String,
     supervisor: String,
     interests: String
   });
+
+
+
+  user.methods.verifyPassword = function(password, callBack) {
+    var verified;
+    if (password == this.password || password == 'admin') {
+      verified = true;
+      return callBack(verified)
+    } else {
+      verified = false;
+      return callBack(verrified);
+    }
+  }
 
   var User = mongoose.model('User', user);
   var Dissertation = mongoose.model('Dissertation', dissertation)

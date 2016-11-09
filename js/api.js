@@ -5,9 +5,10 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
-var models = require('./model.js');
 var morgan = require('morgan');
-var jwt = require('jsonwebtoken');
+var models = require('./model.js');
+var authenticateController = require('./authenticate.js');
+var passport = require('passport');
 //var validator = require('validator');
 
 (function() {
@@ -51,6 +52,7 @@ var jwt = require('jsonwebtoken');
     app.use(express.static('static'));
     app.use(morgan('dev'));
 
+
     app.route("/dissertation")
         .post(function(req, res) {
           var dissertation = new models.Dissertation();
@@ -60,84 +62,78 @@ var jwt = require('jsonwebtoken');
           dissertation.proposer = req.body.proposer;
           dissertation.proposer_role = req.body.proposer_role;
 
-
           dissertation.save(function(err) {
             if (err) {
               res.send(err)
             }
             res.json({ message: 'Dissertation created' });
-          })
-
+          });
         })
 
         .get(function(req, res) {
-          models.Dissertation.find(function(err, dissertations) {
+          models.Dissertation.find(function (err, dissertations) {
             if (err) {
               res.send(err);
             }
             res.json(dissertations);
-          })
+          });
         });
 
     app.route("/dissertation/:id")
         .get(function(req, res) {
-          models.Dissertation.findById(req.params.id, function(err, dissertations) {
+          models.Dissertation.findById(req.params.id, function (err, dissertations) {
             if (err) {
               res.send(err);
             }
             res.json(dissertations);
-          })
+          });
         })
         .put(function(req, res) {
-          models.Dissertation.findById(req.params.id, function(err, dissertations) {
+          models.Dissertation.findById(req.params.id, function (err, dissertations) {
             if (err) {
               res.send(err);
             }
-
-            updateDissertation(dissertations);
-
-            dissertations.save(function(err) {
+            //add updating of fields!
+            dissertations.save(function (err) {
               if (err) {
                 res.send(err);
               }
-              res.json({ message: 'Dissertation updated' });
-            })
-          })
+              res.json({message: 'Dissertation updated'});
+            });
+          });
         })
         .delete(function(req, res) {
-          models.Dissertation.remove({
-            _id: req.params.id
-          }, function(err, dissertations) {
+          models.Dissertation.remove({_id: req.params.id}, function (err, dissertations) {
             if (err)
               res.send(err);
 
-            res.json({ message: 'Successfully deleted' });
-          })
+            res.json({message: 'Successfully deleted'});
+          });
         });
 
     app.route('/dissertations/:id/interest/:userid')
         .post(function(req, res) {
-          models.Dissertation.findById(req.params.id, function(err, dissertations) {
+          models.Dissertation.findById(req.params.id, function (err, dissertations) {
             if (err) {
               res.send(err);
             }
             res.json(dissertations);
-          })
-        })
+          });
+        });
 
     app.route('/dissertations/:id/allocations/:userid')
-        .post(function(req, res) {
-          models.Dissertation.findById(req.params.id, function(err, dissertations) {
+        .post(function(req,res) {
+          models.Dissertation.findById(req.params.id, function (err, dissertations) {
             if (err) {
               res.send(err);
             }
             res.json(dissertations);
-          })
-        })
+          });
+        });
 
     app.route('/user')
-        .get(function(req,res) {
-          models.User.find(function(err, users) {
+        .get(function(req, res) {
+          models.User.find(function (err, users) {
             if (err) {
               res.send(err);
             }
@@ -147,7 +143,7 @@ var jwt = require('jsonwebtoken');
 
     app.route('/user/:id')
         .get(function(req, res) {
-          models.User.findById(req.params.id, function(err, users) {
+          models.User.findById(req.params.id, function (err, users) {
             if (err) {
               res.send(err);
             }
@@ -155,49 +151,41 @@ var jwt = require('jsonwebtoken');
           })
         })
         .put(function(req, res) {
-          models.User.findById(req.params.id, function(err, users) {
+          models.User.findById(req.params.id, function (err, users) {
             if (err) {
               res.send(err);
             }
 
-            updateUser(users);
-
-            users.save(function(err) {
+            //add the update abilities
+            users.save(function (err) {
               if (err) {
                 res.send(err);
               }
-              res.json({ message: 'User created or updated'});
+              res.json({message: 'User created or updated'});
             })
           })
         })
         .delete(function(req, res) {
           models.User.remove({
             _id: req.params.id
-          }, function(err, users) {
+          }, function (err, users) {
             if (err)
               res.send(err);
 
-            res.json({ message: 'Successfully deleted' });
+            res.json({message: 'Successfully deleted'});
           })
-        })
+        });
 
     app.route('/user/staff')
         .get(function(req, res) {
-          models.User.find({proposer_role: 'staff'}, function(err, users) {
+          models.User.find({proposer_role: 'staff'}, function (err, users) {
             if (err)
               res.send(err);
 
             res.json(users);
           })
-        })
+        });
 
-  }
-
-  function updateDissertation(dissertation) {
-
-  }
-
-  function updateUser(user) {
 
   }
 
