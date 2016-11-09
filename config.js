@@ -1,3 +1,3 @@
 module.exports = {
-	‘secret’: ‘footballislife’
+   ‘secret’: ‘footballislife’
 };
