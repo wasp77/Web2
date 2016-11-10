@@ -3,7 +3,8 @@
 if [ ! -x node_modules ]
 then
   echo "Installing Dependencies"
-  npm link express validator mocha chai casperjs sinon body-parser
+  npm link express body-parser
+  npm install mongoose morgan passport bcrypt-nodejs passport-http --save
 fi
 
 mocha test/unit/*.js

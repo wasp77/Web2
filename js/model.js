@@ -4,6 +4,7 @@
  *
  ***********************************************************************************/
 var  mongoose = require("mongoose");
+var bcrypt = require('bcrypt-nodejs');
 
 (function(){ // wrap into a function to scope content
   var schema = mongoose.Schema;
@@ -11,19 +12,17 @@ var  mongoose = require("mongoose");
 
 
   var user = new schema({
-    userid: {type: String, required: true, unique: true},
-    role: {type: String, required: true},
-    given: {type: String, required: true},
-    surname: {type: String, required: true},
-    profile: {
-      job_title: {type: String, required: true},
-      email: {type: String, required: true},
-      telephone: {type: String, required: true},
-      roomnumber: {type: String, required: true},
-      research: String
-    },
+    userid: String,
+    role: String,
+    given: String,
+    surname: String,
+    job_title: String,
+    email: String,
+    telephone: String,
+    roomnumber: String,
+    research: String,
     dissertations: String,
-    password: {type: String, required: true, unique: true}
+    password: String
   });
 
   var dissertation = new schema({
@@ -33,24 +32,50 @@ var  mongoose = require("mongoose");
     proposer: String,
     proposer_role: String,
     supervisor: String,
-    interests: String
+    interests: String,
+    assigned: Boolean
+  });
+
+  user.pre('save', function(callback) {
+    var user = this;
+    if (!user.isModified('password')) {
+      return callback();
+    }
+    bcrypt.hash(user.password, null, null, function(err, hash) {
+      if (err) {
+        return callback(err);
+      }
+      user.password = hash;
+      callback();
+    });
   });
 
 
-
   user.methods.verifyPassword = function(password, callBack) {
-    var verified;
-    if (password == this.password || password == 'admin') {
-      verified = true;
-      return callBack(verified)
+    bcrypt.compare(password, this.password, function(err, res) {
+      if (err){
+        return callBack(err);
+      }
+      callBack(null, res);
+    });
+  };
+
+  dissertation.methods.showInterest = function(interest) {
+    if (this.interests == 'undefined') {
+      this.interests = interest;
     } else {
-      verified = false;
-      return callBack(verrified);
+      this.interests = this.interests + ' ' + interest;
     }
+  };
+
+  dissertation.methods.allocate = function() {
+    this.assigned = true;
   }
 
+
+
   var User = mongoose.model('User', user);
-  var Dissertation = mongoose.model('Dissertation', dissertation)
+  var Dissertation = mongoose.model('Dissertation', dissertation);
 
   /***********************************************************************************
    * Excpetion classes
@@ -64,6 +89,7 @@ var  mongoose = require("mongoose");
   }
   ValidationError.prototype = Error.prototype;
 
+
   /***********************************************************************************
    * Module imports and exports - to work in browser and node.js
    ***********************************************************************************/
@@ -71,7 +97,7 @@ var  mongoose = require("mongoose");
     User: User,
     Dissertation: Dissertation
     //
-  }
+  };
 
   if(typeof __dirname == 'undefined') {
     window.hello = moduleExports; 

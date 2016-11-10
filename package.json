@@ -20,8 +20,12 @@
   },
   "homepage": "https://github.com/wasp77/Web2#readme",
   "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.15.2",
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
     "express": "^4.14.0",
+    "mocha": "^3.1.2",
     "mongoose": "^4.6.6",
     "morgan": "^1.7.0",
     "passport": "^0.3.2",

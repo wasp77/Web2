@@ -3,16 +3,17 @@ var BasicStrategy = require('passport-http').BasicStrategy;
 var models = require('./model.js');
 
 passport.use(new BasicStrategy(function(username, password, callback) {
+
     models.User.findOne({userid: username}, function(err, user) {
         if (err) {
             return callback(err);
         }
 
-        if (!user && user != 'admin') {
+        if (!user) {
             return callback(null, false);
         }
 
-        user.verifyPassword(function(err, verified) {
+        user.verifyPassword(password, function(err, verified) {
             if (err) {
                 return callback(err);
             }
@@ -24,6 +25,7 @@ passport.use(new BasicStrategy(function(username, password, callback) {
             return callback(null, user);
         });
     });
+
 }));
 
 exports.authenticateUser = passport.authenticate('basic', {session: false});
